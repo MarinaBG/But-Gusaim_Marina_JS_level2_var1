@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+<script>    
+    function CoffeMachine(power) {
+        const waterHeatCapacity = 4200;
+        const maxTemp = 90;
+        const grindSpeed = 500;
+
+        let waterAmount = 0;
+        let beansAmount = 0;
+        let totalTime = 0;
+        let timeForBoilWater = 0;
+        let timeForGrindBeans = 0;
+        let timerId = 0;
+
+        this.fillWater = (newWaterAmount) => {
+            if(newWaterAmount >= 50) {
+                waterAmount = newWaterAmount;
+            } else {
+                console.error('Cлишком мало воды!');
+            }
+        }
+
+        this.fillBeans = (newBeansAmount) => {
+            if (newBeansAmount > 0) {
+                beansAmount = newBeansAmount;
+            } else {
+                console.error('Вы забыли положить зерна кофе!');
+            }
+        }
+
+        const getBoilTime = () => {
+            return (waterAmount * waterHeatCapacity * maxTemp) / power;
+        }
+
+        const getGrindBeansTime = () => {
+            return beansAmount * grindSpeed;
+        }
+        
+        this.launch = () => {
+            if ( (waterAmount != 0) && (beansAmount != 0) ) {
+                timeForBoilWater = getBoilTime();
+                timeForGrindBeans = getGrindBeansTime();
+                totalTime = timeForBoilWater + timeForGrindBeans;
+                console.info(`Время ожидания: ${Math.floor(totalTime / 1000)} сек.`);
+                timerId = setTimeout(function () {
+                    console.log('Ваш кофе готов!');
+                }, totalTime);
+            }            
+        }
+
+        this.stop = () => {
+            clearTimeout(timerId);
+            console.log(`Вы остновили кофемашину!`);
+        }
+    }
+
+    var vitek = new CoffeMachine(3000);
+    vitek.fillWater(100);
+    vitek.fillBeans(20);
+    vitek.launch();
+    // vitek.stop();
+</script>
+
+</body>
+</html>
