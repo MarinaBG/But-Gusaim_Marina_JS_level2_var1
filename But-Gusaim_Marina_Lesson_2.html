@@ -1,0 +1,139 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <style type="text/css">
+        body {
+            margin: 0, auto;
+        }
+        .form-group {
+            margin-top: 30px;
+        }
+        #newName {
+            padding-left: 16px;
+            display: none;
+        }
+       </style>
+</head>
+<body>
+    <div class="container">
+        <form class="message-form mt-2">
+            <div class="form-group name">
+                <label for="exampleFormControlSelect1">Имя</label>
+                <select class="form-control" id='name'>
+                    <option value="" disabled selected>Выбор пользователя</option>
+                </select>
+                <input type="text" class="form-control" id="newName" placeholder="Имя нового пользователя">
+            </div>
+
+            <div class="form-group email">
+                <label for="message">E-mail</label>
+                <input type="email" class="form-control" id="email" placeholder="E-mail">
+            </div>
+
+            <div class="form-group age">
+                <label for="message">Возраст</label>
+                <input type="text" class="form-control" id="age" placeholder="Возраст">
+            </div>
+
+            <button type="button" class="btn btn-primary" id="newUser">Новый пользователь</button>
+            <button type="button" class="btn btn-primary" id="submit" disabled="true">Отправить</button>
+        </form>
+    </div>
+    
+
+<script>
+
+    const getUser = (id) => {
+        fetch(`http://89.108.65.123/user/${id}`)
+        .then((result) => {
+            return result.text();
+        }). then((text) => {
+            let user = JSON.parse(text);
+
+            let email = document.getElementById('email');
+            email.value = user.email;
+            
+            let age = document.getElementById('age');
+            age.value = user.age;
+        });
+    }
+
+    const getUsers = () => {
+        fetch('http://89.108.65.123/user')
+        .then((result) => {
+            return result.text();
+        }). then((text) => {
+            let arr = JSON.parse(text);
+            let optionNum = 1;
+
+            var list = document.getElementById('name');
+
+            list.addEventListener("change", event => {
+                if (!event.target.value) {
+                    return;
+                }
+
+                getUser(+event.target.value + 1);
+
+            });
+
+            for (let i = 0; i < arr.length; i++) {                
+                var option = document.createElement('option');
+                option.setAttribute('class', 'name'+ optionNum);
+                option.value = i;
+                optionNum++;
+                option.innerHTML = arr[i].name; 
+                list.appendChild(option);
+            }
+
+            console.log(text);
+            return text;
+        }). catch((error) => {
+            console.error(error);
+        })
+    }
+
+    let newUser = document.getElementById('newUser');
+    let submit = document.getElementById('submit');
+
+    newUser.addEventListener('click', (event) => {
+        let list = document.getElementById('name');
+        list.style.display="none";
+        let newName = document.getElementById('newName');
+        newName.style.display="block";
+        let email = document.getElementById('email');
+        email.value = '';
+        let age = document.getElementById('age');
+        age.value = '';
+        submit.disabled = false;
+    });
+
+    submit.addEventListener('click', (event) => {
+        let user = {
+            name:  document.getElementById('newName').value,
+            email:  document.getElementById('email').value,
+            age: +document.getElementById('age').value,
+        };
+
+        if (user.name == '' || user.email == '' || user.age == 0) {
+            alert('Вы не заполнили все поля!');
+            return;
+        }
+        
+        let xhr = new XMLHttpRequest();
+        xhr.open('post', 'http://89.108.65.123/user', true);
+        xhr.setRequestHeader('Content-type', 'text/plain; charset=utf-8');
+        
+        xhr.send(JSON.stringify(user));
+    });
+
+    getUsers();
+
+</script>
+
+</body>
+</html>
