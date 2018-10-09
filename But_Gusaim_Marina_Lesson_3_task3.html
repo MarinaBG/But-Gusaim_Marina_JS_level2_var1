@@ -61,17 +61,17 @@
 
         function updateElementValidation(input, validationResult) {
             if (validationResult) {
-                input.setAttribute('class', input.className + ' error');
-            } else {
                 input.removeAttribute('class');
                 input.setAttribute('class', 'form-control');
+            } else {
+                input.setAttribute('class', input.className + ' error');
             }
         }
 
-        updateElementValidation(inputName, inputName.value.search(/^[a-zа-яё]+$/i) == -1);
-        updateElementValidation(inputPhone, inputPhone.value.search(/^[+]{1}[7]{1}[(]{1}[0-9]{3}[)]{1}[0-9]{3}[-]{1}[0-9]{4}$/) == -1);
-        updateElementValidation(inputEmail, inputEmail.value.search(/^[a-z]+[.|\-|\w]{1}[a-z]{0,}[@]{1}[[a-z|\d]+[.]{1}[a-z]{2,3}$/) == -1);
-        updateElementValidation(inputText, inputText.value == '');
+        updateElementValidation(inputName, /^[a-zа-яё]+$/i.test(inputName.value));
+        updateElementValidation(inputPhone, /^[+]{1}[7]{1}[(]{1}[0-9]{3}[)]{1}[0-9]{3}[-]{1}[0-9]{4}$/.test(inputPhone.value));
+        updateElementValidation(inputEmail, /^[a-z]+[.|\-|\w]{1}[a-z]{0,}[@]{1}[[a-z|\d]+[.]{1}[a-z]{2,3}$/.test(inputEmail.value));
+        updateElementValidation(inputText, inputText.value.length);
     }); 
 </script>
     
