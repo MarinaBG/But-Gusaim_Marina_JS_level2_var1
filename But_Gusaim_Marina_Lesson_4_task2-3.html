@@ -1,0 +1,167 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+    <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.js"integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30="crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"></link>
+    <title>Document</title>
+    <style>
+        .container {
+            margin: 0, auto;
+            width: 1200px;
+        }
+        span {
+            color: red;
+        }
+        .form-control.error:focus /* .error */ {
+            border-color: #FF0000;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+        }
+        .error {
+            border-color: #FF0000;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+        }
+        .form-group {
+            margin-top: 30px;
+        }
+        #newCity {
+            padding-left: 16px;
+            display: block;
+        }
+        .cities {
+            width: 540px;
+        }
+        .cities:first-child {
+            margin-right: 30px;
+        }
+        .citiesGroup {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form class="message-form mt-2">
+            <div class="form-group name">
+                <label for="exampleFormControlSelect1">Имя <span>*</span></label>
+                <input type="text" class="form-control" id="name" placeholder="Имя">
+            </div>
+
+            <div class="form-group phone">
+                <label for="message">Телефон <span>*</span></label>
+                <input type="text" class="form-control" id="phone" placeholder="+7(000)000-0000">
+            </div>
+            
+            <div class="form-group email">
+                <label for="message">E-mail <span>*</span></label>
+                <input type="email" class="form-control" id="email" placeholder="E-mail">
+            </div>
+
+            <!--  Добавлено в ДЗ 4 -->
+            <div class="citiesGroup">
+                <div class="form-group cities">
+                    <label for="exampleFormControlSelect1">Выберите город из списка</label>
+                    <select class="form-control" id="cities">
+                        <option value="" disabled selected>Город</option>
+                    </select>
+                </div>
+                
+                <div class="form-group cities">
+                    <label for="exampleFormControlSelect1">Введите название вашего города</label>
+                    <input type="text" class="form-control" id="newCity" placeholder="Город">
+                </div>
+            </div>
+            <!-- ---- -->
+
+            <div class="form-group">
+                <label for="exampleFormControlTextarea1">Текст сообщения <span>*</span></label>
+                <textarea class="form-control" id="text" rows="3"></textarea>
+            </div>
+            
+            <button type="button" class="btn btn-primary" id="submit">Отправить</button>
+           
+        </form>    
+    </div>
+    
+<script>
+    let submit =  document.getElementById('submit');
+
+    submit.addEventListener("click", event => {
+        let inputName = document.querySelector('#name');
+        let inputPhone = document.querySelector('#phone');
+        let inputEmail = document.querySelector('#email');
+        let inputText = document.querySelector('#text');
+
+        let sendMessage = true;
+
+        function updateElementValidation(input, validationResult) {
+            if (validationResult) {
+                input.removeAttribute('class');
+                input.setAttribute('class', 'form-control');
+            } else {
+                input.setAttribute('class', input.className + ' error');
+                sendMessage = false;
+            }
+        }
+
+        updateElementValidation(inputName, /^[a-zа-яё]+$/i.test(inputName.value));
+        updateElementValidation(inputPhone, /^[+]{1}[7]{1}[(]{1}[0-9]{3}[)]{1}[0-9]{3}[-]{1}[0-9]{4}$/.test(inputPhone.value));
+        updateElementValidation(inputEmail, /^[a-z]+[.|\-|\w]{1}[a-z]{0,}[@]{1}[[a-z|\d]+[.]{1}[a-z]{2,3}$/.test(inputEmail.value));
+        updateElementValidation(inputText, inputText.value.length);
+
+        if (!sendMessage) {
+            event.preventDefault();
+	        alert('Неодходимо корректно заполнить все обязательные поля!');
+        }
+    }); 
+
+    //Добавлено в ДЗ 4
+    function getCities (params) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: 'http://89.108.65.123/cities',
+                method: 'GET',
+                dataType: 'json',
+            }).done(cities => {
+                resolve(cities);
+            }).fail((jqXHR, textStatus) => {
+                console.error( "Request failed: " + textStatus );
+                reject(textStatus);
+            });
+        });
+    }
+
+    getCities().then(cities => {
+        cities.forEach (city => {
+            let cityOption = document.createElement('option');
+            cityOption.innerHTML = city.name;
+            let cityDiv = document.querySelector('#cities');
+            cityDiv.appendChild(cityOption);
+        });
+    });
+    
+    $('#newCity').autocomplete({
+        source: (req, add) => {
+            if (req.term.length < 3) {
+                return;
+            }
+            getCities().then(cities => {
+                let citiesArr = [];
+                let term = req.term.toLowerCase();
+                cities.forEach(city => {
+                    if (city.name.toLowerCase().indexOf(term) == 0) {
+                        citiesArr.push(city.name);
+                    }
+                });
+                add(citiesArr);
+            });
+        }
+    });
+     
+</script>
+</body>
+</html>
